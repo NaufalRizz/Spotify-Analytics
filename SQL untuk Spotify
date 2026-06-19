@@ -1,23 +1,153 @@
+##  Top 10 Artis Paling Dominan
+
 SELECT
-    track_name,
-    artist_name,
-    artist_count,
-    released_year,
+  artist_name,
+  COUNT(*)                          AS jml_lagu,
+  SUM(streams)                      AS total_streams,
+  ROUND(AVG(streams) / 1000000, 1)  AS avg_streams_juta,
+  MAX(streams)                      AS streams_terbaik
+FROM spotify
+GROUP BY artist_name
+ORDER BY total_streams DESC
+LIMIT 10;
+
+## waktu terbaik rilis lagu
+WITH bulan AS (
+  SELECT
     released_month,
-    streams,
-    in_spotify_playlists,
-    mode,
-    bpm,
-    `danceability_%` AS danceability,
-    `energy_%`       AS energy,
-    `valence_%`      AS valence,
-    CASE
-        WHEN artist_count = 1 THEN 'Solo'
-        WHEN artist_count = 2 THEN 'Duo'
-        ELSE 'Grup 3+'
-    END AS tipe_artis,
-    CASE
-        WHEN streams >= 1000000000 THEN 'Hits (>1B)'
-        ELSE 'Normal (<1B)'
-    END AS kategori_streams
-FROM spotify;
+    COUNT(*)                         AS jml_lagu,
+    ROUND(AVG(streams) / 1000000, 1) AS avg_streams,
+    ROUND(SUM(streams) / 1000000, 0) AS total_streams
+  FROM spotify
+  GROUP BY released_month
+)
+SELECT
+  released_month,
+  jml_lagu,
+  avg_streams,
+  total_streams,
+  RANK() OVER (ORDER BY avg_streams DESC) AS ranking_bulan
+FROM bulan
+ORDER BY ranking_bulan;
+
+##  Korelasi Playlist vs Streams
+SELECT
+  CASE
+    WHEN in_spotify_playlists >= 10000 THEN 'A: >10.000 playlist'
+    WHEN in_spotify_playlists >= 5000  THEN 'B: 5.000-10.000'
+    WHEN in_spotify_playlists >= 1000  THEN 'C: 1.000-5.000'
+    WHEN in_spotify_playlists >= 100   THEN 'D: 100-1.000'
+    ELSE                                    'E: <100 playlist'
+  END AS segmen_playlist,
+  COUNT(*)                         AS jml_lagu,
+  ROUND(AVG(streams) / 1000000, 1) AS avg_streams_juta
+FROM spotify
+GROUP BY segmen_playlist
+ORDER BY avg_streams_juta DESC;
+
+## Tren YoY (Year-over-Year)
+WITH tren AS (
+  SELECT
+    released_year,
+    COUNT(*)                         AS jml_lagu,
+    ROUND(AVG(streams) / 1000000, 1) AS avg_streams
+  FROM spotify
+  WHERE released_year >= 2015
+  GROUP BY released_year
+)
+SELECT
+  released_year,
+  jml_lagu,
+  avg_streams,
+  LAG(avg_streams) OVER (ORDER BY released_year)              AS prev_avg,
+  ROUND(avg_streams - LAG(avg_streams) OVER
+    (ORDER BY released_year), 1)                              AS pertumbuhan,
+  ROUND(
+    (avg_streams - LAG(avg_streams) OVER (ORDER BY released_year))
+    / LAG(avg_streams) OVER (ORDER BY released_year) * 100
+  , 1)                                                        AS pct_growth
+FROM tren
+ORDER BY released_year;
+
+## Solo vs Kolaborasi
+SELECT
+  CASE
+    WHEN artist_count = 1 THEN 'Solo'
+    WHEN artist_count = 2 THEN 'Duo'
+    ELSE 'Grup 3+'
+  END                              AS tipe_artis,
+  COUNT(*)                         AS jml_lagu,
+  ROUND(AVG(streams) / 1000000, 1) AS avg_streams_juta,
+  ROUND(MAX(streams) / 1000000, 0) AS streams_tertinggi_juta
+FROM spotify
+GROUP BY tipe_artis
+ORDER BY avg_streams_juta DESC;
+
+##  Audio Features Lagu Hits vs Normal
+SELECT
+  CASE
+    WHEN streams >= 1000000000 THEN 'Hits (>1B)'
+    ELSE 'Normal (<1B)'
+  END                                   AS kategori,
+  COUNT(*)                              AS jml_lagu,
+  ROUND(AVG(`danceability_%`), 1)       AS avg_dance,
+  ROUND(AVG(`energy_%`), 1)             AS avg_energy,
+  ROUND(AVG(`valence_%`), 1)            AS avg_valence,
+  ROUND(AVG(`acousticness_%`), 1)       AS avg_acoustic,
+  ROUND(AVG(bpm), 0)                    AS avg_bpm
+FROM spotify
+GROUP BY kategori
+ORDER BY kategori;
+
+## Artis Paling Konsisten
+WITH artis_stats AS (
+  SELECT
+    artist_name,
+    COUNT(*)                          AS jml_lagu,
+    ROUND(AVG(streams) / 1000000, 1)  AS avg_streams,
+    ROUND(MIN(streams) / 1000000, 1)  AS streams_terendah,
+    ROUND(MAX(streams) / 1000000, 1)  AS streams_tertinggi
+  FROM spotify
+  GROUP BY artist_name
+  HAVING COUNT(*) >= 3           -- minimal 3 lagu
+)
+SELECT
+  artist_name,
+  jml_lagu,
+  avg_streams,
+  streams_terendah,
+  streams_tertinggi,
+  streams_tertinggi - streams_terendah  AS gap,  -- gap kecil = konsisten
+  RANK() OVER (ORDER BY avg_streams DESC) AS rank_avg
+FROM artis_stats
+ORDER BY rank_avg
+LIMIT 15;
+
+## Lagu yang Overperform di Tahunnya
+WITH avg_tahun AS (
+  SELECT
+    released_year,
+    AVG(streams) AS avg_streams_tahun
+  FROM spotify
+  GROUP BY released_year
+),
+perbandingan AS (
+  SELECT
+    s.track_name,
+    s.artist_name,
+    s.released_year,
+    s.streams,
+    ROUND(a.avg_streams_tahun / 1000000, 1)        AS avg_tahun_juta,
+    ROUND(s.streams / 1000000, 1)                  AS streams_juta,
+    ROUND((s.streams - a.avg_streams_tahun)
+      / 1000000, 1)                                AS lebih_dari_avg
+  FROM spotify s
+  JOIN avg_tahun a ON s.released_year = a.released_year
+)
+SELECT *
+FROM perbandingan
+WHERE lebih_dari_avg > 500       -- 500 juta di atas rata-rata tahunnya
+ORDER BY lebih_dari_avg DESC
+LIMIT 15;
+
+## 
