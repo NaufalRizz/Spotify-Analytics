@@ -1,0 +1,23 @@
+SELECT
+    track_name,
+    artist_name,
+    artist_count,
+    released_year,
+    released_month,
+    streams,
+    in_spotify_playlists,
+    mode,
+    bpm,
+    `danceability_%` AS danceability,
+    `energy_%`       AS energy,
+    `valence_%`      AS valence,
+    CASE
+        WHEN artist_count = 1 THEN 'Solo'
+        WHEN artist_count = 2 THEN 'Duo'
+        ELSE 'Grup 3+'
+    END AS tipe_artis,
+    CASE
+        WHEN streams >= 1000000000 THEN 'Hits (>1B)'
+        ELSE 'Normal (<1B)'
+    END AS kategori_streams
+FROM spotify;
