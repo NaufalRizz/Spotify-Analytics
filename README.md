@@ -13,8 +13,8 @@ tren musik populer untuk mendukung keputusan A&R (Artist & Repertoire)
 
 ## Tools
 
-- **MySQL Workbench** — data cleaning, EDA, dan analisis
-- **Looker Studio** — dashboard visualisasi interaktif
+- **MySQL Workbench** (data cleaning, EDA, dan analisis)
+- **Looker Studio** (dashboard visualisasi interaktif)
 
 ## Pertanyaan Bisnis yang Dijawab
 
@@ -34,3 +34,5 @@ tren musik populer untuk mendukung keputusan A&R (Artist & Repertoire)
 - Common Table Expression (CTE) — termasuk CTE berantai
 - Window Functions: `RANK()`, `DENSE_RANK()`, `ROW_NUMBER()`, 
   `LAG()`, `PARTITION BY`, running total
+
+  LINK Looker Data Studio : https://datastudio.google.com/reporting/23f28fec-5395-4b63-bea5-9e8f1df254fb
