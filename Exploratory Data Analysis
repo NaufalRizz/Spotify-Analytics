@@ -5,10 +5,10 @@ Dataset ini berisi data lagu dari Spotify dengan kolom-kolom utama seperti `trac
 
 2. Data Cleaning
 Sebelum analisis lebih lanjut, dilakukan pengecekan kualitas data:
-- **Missing values** — identifikasi kolom dengan data kosong dan penanganannya (drop/impute)
-- **Duplikasi** — memastikan tidak ada entri lagu yang ter-duplikat
-- **Outlier** — pengecekan nilai ekstrem pada `duration_ms` (lagu terlalu pendek/panjang)
-- **Konsistensi format** — penyamaan penulisan kategori genre yang tidak seragam
+- Missing values — identifikasi kolom dengan data kosong dan penanganannya (drop/impute)
+- Duplikasi — memastikan tidak ada entri lagu yang ter-duplikat
+- Outlier — pengecekan nilai ekstrem pada `duration_ms` (lagu terlalu pendek/panjang)
+- Konsistensi format — penyamaan penulisan kategori genre yang tidak seragam
 
 3. Univariate Analysis
 Melihat karakteristik masing-masing variabel secara individual:
