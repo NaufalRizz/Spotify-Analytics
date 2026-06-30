@@ -1,0 +1,35 @@
+Exploratory Data Analysis (EDA) Process
+
+1. Data Understanding
+Dataset ini berisi data lagu dari Spotify dengan kolom-kolom utama seperti `track_name`, `artist`, `genre`, `duration_ms`, `popularity`, `danceability`, `energy`, dan beberapa audio feature lainnya. Tahap awal dilakukan untuk memahami struktur tabel, jumlah baris, jumlah artist/genre unik, serta tipe data setiap kolom.
+
+2. Data Cleaning
+Sebelum analisis lebih lanjut, dilakukan pengecekan kualitas data:
+- **Missing values** — identifikasi kolom dengan data kosong dan penanganannya (drop/impute)
+- **Duplikasi** — memastikan tidak ada entri lagu yang ter-duplikat
+- **Outlier** — pengecekan nilai ekstrem pada `duration_ms` (lagu terlalu pendek/panjang)
+- **Konsistensi format** — penyamaan penulisan kategori genre yang tidak seragam
+
+3. Univariate Analysis
+Melihat karakteristik masing-masing variabel secara individual:
+- Distribusi `popularity` score di seluruh dataset
+- Distribusi durasi lagu (`duration_ms`)
+- Genre dengan jumlah lagu terbanyak dalam dataset
+
+4. Bivariate Analysis
+Eksplorasi hubungan antar variabel untuk menjawab pertanyaan bisnis:
+- Hubungan antara `danceability` / `energy` dengan `popularity`
+- Genre dengan rata-rata `popularity` tertinggi
+- Korelasi antara durasi lagu dengan tingkat popularitas
+
+5. Key Findings
+- Genre **[isi genre dominan]** mendominasi sebagian besar lagu populer dalam dataset
+- Lagu dengan durasi lebih pendek cenderung memiliki rata-rata popularity **[isi % jika ada]** lebih tinggi
+- Korelasi antara `energy` dan `popularity` tergolong **[lemah/sedang/kuat]**, mengindikasikan faktor lain turut berperan dalam popularitas sebuah lagu
+
+6. Visualization
+Insight di atas divisualisasikan dalam dashboard interaktif menggunakan **Looker Studio**, mencakup:
+- Bar chart top genre berdasarkan popularity
+- Scatter plot popularity vs duration/energy
+- Heatmap korelasi antar fitur numerik
+
